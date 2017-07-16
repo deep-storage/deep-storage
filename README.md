@@ -6,6 +6,14 @@ Deep Storage provides observable state for reactive applications in JavaScript.
 * Optimised for use with React
 * No global state
 
+## Documentation
+
+[The Deep Storage user manual|https://deep-storage.gitbooks.io/deep-storage/content/]
+
+## TodoMVC
+
+See an implementation of TodoMVC that uses Deep Storage here: [https://github.com/deep-storage/deep-storage/tree/master/examples/react-todomvc]
+
 ## The gist of Deep Storage
 
 ### 1. Create a new Deep Storage instance and initialise its state

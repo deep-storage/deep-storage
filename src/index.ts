@@ -63,6 +63,8 @@ export class DeepStorage<State> implements Storage<State> {
         if (path.length === 0) {
             this.state = newState as any;
         } else {
+            // todo: this will no doubt cause some bugs... better to replace all the 
+            // parent objects too so that reference equality checks work in react
             this.stateIn(...path.slice(0, path.length - 1))[path[path.length - 1]] = newState;
         }
         const fullPath = this.path.concat(path);
