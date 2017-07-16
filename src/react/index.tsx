@@ -1,15 +1,16 @@
 import * as React from 'react';
-import { DeepStorage, Path, Subscription } from "../index";
+import { DeepStorage, Path, Subscription, parsePaths, stringOrNumber } from "../index";
 
-export const deep = <State extends {}>(storage: DeepStorage<State>, paths: { [key: string]: Path }) => <P extends {}>(BaseComponent: React.ComponentType<P>) =>
-    class extends React.Component<P, {}> {
+export const deep = <State extends {}>(storage: DeepStorage<State>, paths: { [key: string]: Path | stringOrNumber }) => <P extends {}>(BaseComponent: React.ComponentType<P>) => {
+    const parsedPaths = parsePaths(paths);
+    return class extends React.Component<P, {}> {
         subscription: Subscription;
         componentDidMount() {
             this.subscription = storage.subscription((...args: any[]) => {
                 this.forceUpdate();
             });
             for (let key in paths) {
-                this.subscription.subscribeTo(...paths[key]);
+                this.subscription.subscribeTo(...parsedPaths[key]);
             }
         }
         componentWillUnmount() {
@@ -17,8 +18,8 @@ export const deep = <State extends {}>(storage: DeepStorage<State>, paths: { [ke
         }
         shouldComponentUpdate(nextProps: P, nextState: {}) {
             const nextPropsAny: any = nextProps;
-            for (let key in paths) {
-                if(nextPropsAny[key] !== storage.stateIn(...paths[key])) {
+            for (let key in parsedPaths) {
+                if (nextPropsAny[key] !== storage.stateIn(...parsedPaths[key])) {
                     return true;
                 }
             }
@@ -26,9 +27,10 @@ export const deep = <State extends {}>(storage: DeepStorage<State>, paths: { [ke
         }
         render() {
             const newProps: any = Object.assign({}, this.props);
-            for (let key in paths) {
-                newProps[key] = storage.stateIn(...paths[key])
+            for (let key in parsedPaths) {
+                newProps[key] = storage.stateIn(...parsedPaths[key])
             }
             return <BaseComponent {...newProps} />;
         }
     };
+}

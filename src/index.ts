@@ -1,4 +1,4 @@
-type StateUpdateCallback = <DeepState>(path: Path, oldState: DeepState, newState: DeepState) => void;
+type StateUpdateCallback = <DeepState>(path: Path, newState: DeepState, oldState: DeepState) => void;
 
 export interface DeepSubscriptions {
     subscription: (callback: StateUpdateCallback) => Subscription;
@@ -110,4 +110,27 @@ export class DeepStorage<State> implements Storage<State> {
             cancel
         }
     }
+}
+
+function numberOrString(value: string): stringOrNumber {
+    const parsed = parseInt(value);
+    return parsed.toString() === value ? parsed : value;
+}
+
+export function parsePath(path: Path | stringOrNumber): Path {
+    if(path instanceof Array) {
+        return path;
+    } else if (typeof path === 'number') {
+        return [path];
+    } else if (typeof path === 'string') {
+        return path.split('/').map(numberOrString);
+    }
+}
+
+export function parsePaths(paths: {[key: string]: Path | stringOrNumber}): {[key: string]: Path}  {
+    const result: {[key: string]: Path} = {};
+    for(let key in paths) {
+        result[key] = parsePath(paths[key]);
+    }
+    return result;
 }
