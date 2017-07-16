@@ -26,7 +26,8 @@ export const deep = <State extends {}>(storage: DeepStorage<State>, paths: { [ke
             return false;
         }
         render() {
-            const newProps: any = Object.assign({}, this.props);
+            const anyProps: any = this.props;
+            const newProps: any = {...anyProps};
             for (let key in parsedPaths) {
                 newProps[key] = storage.stateIn(...parsedPaths[key])
             }

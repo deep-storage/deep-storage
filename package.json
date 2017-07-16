@@ -1,8 +1,8 @@
 {
   "name": "deep-storage",
-  "version": "1.0.0",
-  "description": "Store and track data",
-  "main": "index.js",
+  "version": "0.0.1",
+  "description": "Simple observable state management for reactive applications",
+  "main": "lib/index.js",
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^20.0.2",
@@ -14,7 +14,8 @@
     "webpack-dev-server": "^2.5.1"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc"
   },
   "dependencies": {
     "react": "^15.6.1",
