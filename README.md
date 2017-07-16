@@ -1,5 +1,3 @@
-# Deep Storage
-
 Deep Storage provides observable state for reactive applications in JavaScript.
 
 ## Key features
