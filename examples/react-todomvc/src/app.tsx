@@ -5,6 +5,8 @@ import TodoItem from "./todoItem";
 import { DeepSubscriptions, Subscription } from "../../../src/index";
 import { values, sortBy, reverse } from 'lodash';
 
+const director = require('director');
+
 export enum NowShowing {
     AllTodos,
     ActiveTodos,
@@ -21,7 +23,7 @@ export interface TodoAppState {
 
 export interface TodoAppProps {
     model: TodoModel;
-    todos?: {[key: string]: Todo}
+    todos?: { [key: string]: Todo }
 }
 
 export default class TodoApp extends React.Component<TodoAppProps, TodoAppState> {
@@ -33,6 +35,17 @@ export default class TodoApp extends React.Component<TodoAppProps, TodoAppState>
 
     constructor(props: TodoAppProps) {
         super(props);
+    }
+
+    componentDidMount() {
+        const setState = this.setState;
+
+        var router = new director.Router({
+            '/': setState.bind(this, { nowShowing: NowShowing.AllTodos }),
+            '/active': setState.bind(this, { nowShowing: NowShowing.ActiveTodos }),
+            '/completed': setState.bind(this, { nowShowing: NowShowing.CompletedTodos })
+        });
+
     }
 
     handleChange = (event: React.ChangeEvent<any>) => {

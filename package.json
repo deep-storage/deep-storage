@@ -6,6 +6,8 @@
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^20.0.2",
+    "@types/react": "^15.0.38",
+    "@types/react-dom": "^15.5.1",
     "jest": "^20.0.4",
     "typescript": "^2.4.1",
     "webpack": "^3.3.0",
@@ -13,5 +15,9 @@
   },
   "scripts": {
     "test": "jest"
+  },
+  "dependencies": {
+    "react": "^15.6.1",
+    "react-dom": "^15.6.1"
   }
 }

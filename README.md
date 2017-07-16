@@ -16,7 +16,7 @@ Deep Storage provides observable state for reactive applications in JavaScript.
 
 ### 2. Create a view that responds to changes in state
 
-    import {DeepObserver} from 'deep-storage/react';
+    import {deep} from 'deep-storage/react';
 
     class TimerView extends React.Component {
         render() {
@@ -31,10 +31,10 @@ Deep Storage provides observable state for reactive applications in JavaScript.
         }
     };
 
+    const DeepTimerView = deep(storage, {timer: ['timer']})(TimerView);
+
     ReactDOM.render((
-        <DeepObserver storage={storage} paths={{timer: ['timer']}}>
-            <TimerView resetTimer={resetTimer}/>
-        </DeepObserver>
+        <DeepTimerView resetTimer={resetTimer}/>
     ), document.body);
 
 ### 3. Modify the State

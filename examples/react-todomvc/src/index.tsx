@@ -5,7 +5,7 @@ import 'todomvc-common/base.css';
 import 'todomvc-app-css/index.css';
 
 import { DeepStorage, Path, Subscription } from '../../../src/index';
-import { DeepObserver } from '../../../src/react/index';
+import { deep } from '../../../src/react/index';
 
 import TodoApp from './app';
 import { Todos, DeepTodoModel } from "./todoModel";
@@ -16,6 +16,8 @@ const storage = new DeepStorage({
 
 const model = new DeepTodoModel(storage);
 
+const DeepTodoApp = deep(storage, { todos: ['todos'] })(TodoApp);
+
 ReactDOM.render(
-    (<DeepObserver paths={{todos: ['todos']}} storage={storage}><TodoApp model={model}/></DeepObserver>)
+    (<DeepTodoApp model={model} />)
     , document.getElementById('root'));

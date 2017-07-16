@@ -9,7 +9,8 @@
         "lib": [
             "es6",
             "dom"
-        ]
+        ],
+        "experimentalDecorators": true
     },
     "include": [
         "./src/**/*"
