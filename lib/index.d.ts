@@ -1,16 +1,46 @@
 export declare type StateUpdateCallback = <DeepState>(path: Path, newState: DeepState, oldState: DeepState) => void;
 export interface DeepSubscriptions {
+    /**
+     * Returns a new subscription that can subscribeTo paths in state. Note,
+     * the subscription must be cancelled when no longer in use.
+     */
     subscription: (callback: StateUpdateCallback) => DeepSubscription;
 }
 export interface DeepStorage<State> extends DeepSubscriptions {
+    /**
+     * sets a value in deep storage by path and notifies subscribers. shortcut for
+     * updateIn where the old value is ignored
+     */
     setIn: (...path: Path) => <DeepState>(newValue: DeepState) => void;
+    /**
+     * Updates the whole state and notifies subscribers
+     */
     update: (callback: (s: State) => State) => void;
+    /**
+     * Updates a value in deep storage by path and notifies subscribers. Must not
+     * mutate the oldValue
+     */
     updateIn: (...path: Path) => <DeepState>(callback: (s: DeepState) => DeepState) => void;
+    /**
+     * Updates a property of the current state and notifies subscribers.
+     */
     updateProperty: <Key extends keyof State>(key: Key, callback: (s: State[Key]) => State[Key]) => void;
+    /**
+     * Returns the state that this deep storage is managing
+     */
     state: State;
+    /**
+     * Returns state by a path
+     */
     stateIn: <DeepState>(...path: Path) => DeepStorage<DeepState>;
+    /**
+     * Creates a new DeepStorage at this point in the object path
+     */
     deep: <DeepState>(...path: Path) => DeepStorage<DeepState>;
 }
+/**
+ * A cancelable way to subscribe to paths in state
+ */
 export interface DeepSubscription {
     subscribeTo: (...path: Path) => void;
     cancel: () => void;
