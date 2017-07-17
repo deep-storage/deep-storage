@@ -7,14 +7,15 @@
   "devDependencies": {
     "@types/jest": "^20.0.2",
     "jest": "^20.0.4",
+    "rimraf": "^2.6.1",
     "typescript": "^2.4.1",
     "webpack": "^3.3.0",
     "webpack-dev-server": "^2.5.1"
   },
   "scripts": {
     "test": "jest",
-    "build": "tsc"
+    "build": "rimraf lib && tsc"
   },
-  "dependencies": {
-  }
+  "dependencies": {},
+  "types": "lib/index.d.ts"
 }

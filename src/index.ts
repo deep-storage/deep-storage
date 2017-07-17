@@ -1,4 +1,4 @@
-type StateUpdateCallback = <DeepState>(path: Path, newState: DeepState, oldState: DeepState) => void;
+export type StateUpdateCallback = <DeepState>(path: Path, newState: DeepState, oldState: DeepState) => void;
 
 export interface DeepSubscriptions {
     subscription: (callback: StateUpdateCallback) => Subscription;
