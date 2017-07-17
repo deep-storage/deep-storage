@@ -29,7 +29,7 @@ See an [implementation of TodoMVC that uses Deep Storage](https://github.com/dee
 
 ### 2. Create a view that responds to changes in state
 
-    import {deep} from 'deep-storage/react';
+    import {deep} from 'deep-storage-react';
 
     class TimerView extends React.Component {
         render() {

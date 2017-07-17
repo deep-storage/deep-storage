@@ -1,13 +1,11 @@
 {
   "name": "deep-storage",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "Simple observable state management for reactive applications",
   "main": "lib/index.js",
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^20.0.2",
-    "@types/react": "^15.0.38",
-    "@types/react-dom": "^15.5.1",
     "jest": "^20.0.4",
     "typescript": "^2.4.1",
     "webpack": "^3.3.0",
@@ -18,7 +16,5 @@
     "build": "tsc"
   },
   "dependencies": {
-    "react": "^15.6.1",
-    "react-dom": "^15.6.1"
   }
 }
