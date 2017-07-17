@@ -4,14 +4,14 @@ export interface DeepSubscriptions {
     subscription: (callback: StateUpdateCallback) => Subscription;
 }
 
-export interface Storage<State> extends DeepSubscriptions {
+export interface DeepStorage<State> extends DeepSubscriptions {
     setIn: (...path: Path) => <DeepState>(newValue: DeepState) => void;
     update: (callback: (s: State) => State) => void;
     updateIn: (...path: Path) => <DeepState>(callback: (s: DeepState) => DeepState) => void;
     updateProperty: <Key extends keyof State>(key: Key, callback: (s: State[Key]) => State[Key]) => void;
     state: State;
-    stateIn: <DeepState>(...path: Path) => Storage<DeepState>;
-    deep: <DeepState>(...path: Path) => Storage<DeepState>;
+    stateIn: <DeepState>(...path: Path) => DeepStorage<DeepState>;
+    deep: <DeepState>(...path: Path) => DeepStorage<DeepState>;
 }
 
 function isPrefix<T>(full: T[], partial: T[]) {
@@ -30,7 +30,9 @@ export interface Subscription {
 export type stringOrNumber = string | number;
 export type Path = stringOrNumber[];
 
-export class DeepStorage<State> implements Storage<State> {
+export default <State>(s: State): DeepStorage<State> => new DefaultDeepStorage(s);
+
+export class DefaultDeepStorage<State> implements DeepStorage<State> {
 
     private id: number = 0;
     public path: Path;
@@ -89,8 +91,8 @@ export class DeepStorage<State> implements Storage<State> {
         }
         return currentState;
     }
-    deep = <DeepState>(...path: Path): Storage<DeepState> => {
-        return new DeepStorage<DeepState>(this.stateIn<DeepState>(...path), ...this.path);
+    deep = <DeepState>(...path: Path): DeepStorage<DeepState> => {
+        return new DefaultDeepStorage<DeepState>(this.stateIn<DeepState>(...path), ...this.path);
     }
     subscription = (callback: StateUpdateCallback) => {
         const subscriberId = this.id++;
