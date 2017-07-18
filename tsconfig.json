@@ -6,7 +6,11 @@
         "module": "commonjs",
         "target": "es5",
         "jsx": "react",
-        "declaration": true
+        "declaration": true,
+        "lib": [
+            "es6",
+            "dom"
+        ]
     },
     "include": [
         "./src/**/*"

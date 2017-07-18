@@ -32,7 +32,7 @@ export interface DeepStorage<State> extends DeepSubscriptions {
     /**
      * Returns state by a path
      */
-    stateIn: <DeepState>(...path: Path) => DeepStorage<DeepState>;
+    stateIn: <DeepState>(...path: Path) => DeepState;
     /**
      * Creates a new DeepStorage at this point in the object path
      */
@@ -52,9 +52,8 @@ export default _default;
 export declare class DefaultDeepStorage<State> implements DeepStorage<State> {
     state: State;
     private id;
-    path: Path;
     private subscriptions;
-    constructor(state: State, ...path: Path);
+    constructor(state: State);
     update: (callback: (s: State) => State) => void;
     updateProperty: <Key extends keyof State>(key: Key, callback: (s: State[Key]) => State[Key]) => void;
     setIn: (...path: (string | number)[]) => <DeepState>(newValue: DeepState) => void;
@@ -68,6 +67,19 @@ export declare class DefaultDeepStorage<State> implements DeepStorage<State> {
         subscribeTo: (...path: (string | number)[]) => void;
         cancel: () => void;
     };
+}
+export declare class NestedDeepStorage<RootState, State> implements DeepStorage<State> {
+    path: Path;
+    root: DeepStorage<RootState>;
+    constructor(path: Path, root: DeepStorage<RootState>);
+    setIn: (...path: (string | number)[]) => <DeepState>(newValue: DeepState) => void;
+    update: (callback: (s: State) => State) => void;
+    updateIn: (...path: (string | number)[]) => <DeepState>(callback: (s: DeepState) => DeepState) => void;
+    updateProperty: <Key extends keyof State>(key: Key, callback: (s: State[Key]) => State[Key]) => void;
+    readonly state: State;
+    stateIn: <DeepState>(...path: (string | number)[]) => DeepState;
+    deep: <DeepState>(...path: (string | number)[]) => DeepStorage<DeepState>;
+    subscription: (callback: StateUpdateCallback) => DeepSubscription;
 }
 export declare function parsePath(path: Path | stringOrNumber): Path;
 export declare function parsePaths(paths: {

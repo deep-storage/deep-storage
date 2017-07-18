@@ -40,7 +40,7 @@ export interface DeepStorage<State> extends DeepSubscriptions {
     /**
      * Returns state by a path
      */
-    stateIn: <DeepState>(...path: Path) => DeepStorage<DeepState>;
+    stateIn: <DeepState>(...path: Path) => DeepState;
 
     /**
      * Creates a new DeepStorage at this point in the object path
@@ -83,11 +83,9 @@ export default <State>(s: State): DeepStorage<State> => new DefaultDeepStorage(s
 export class DefaultDeepStorage<State> implements DeepStorage<State> {
 
     private id: number = 0;
-    public path: Path;
 
     private subscriptions: { [key: number]: { paths: Path[], callback: StateUpdateCallback } } = {};
-    constructor(public state: State, ...path: Path) {
-        this.path = path;
+    constructor(public state: State) {
     }
     update = (callback: (s: State) => State): void => {
         return this.updateIn()(callback);
@@ -100,7 +98,7 @@ export class DefaultDeepStorage<State> implements DeepStorage<State> {
     }
     merge = (partial: {[P in keyof State]?: State[P]}) => {
         this.update(oldState => {
-            for(let key in partial) {
+            for (let key in partial) {
                 oldState[key] = partial[key];
             }
             return oldState;
@@ -117,7 +115,7 @@ export class DefaultDeepStorage<State> implements DeepStorage<State> {
             // parent objects too so that reference equality checks work in react
             this.stateIn(...path.slice(0, path.length - 1))[path[path.length - 1]] = newState;
         }
-        const fullPath = this.path.concat(path);
+        const fullPath = path;
         for (let subscriberId in this.subscriptions) {
             const subscriber = this.subscriptions[subscriberId];
             // check to see if we have any matches
@@ -128,7 +126,7 @@ export class DefaultDeepStorage<State> implements DeepStorage<State> {
     }
     stateIn = <DeepState>(...path: Path) => {
         let currentState: any = this.state;
-        for (let p of this.path.concat(path)) {
+        for (let p of path) {
             if (!(p in currentState)) {
                 // todo: consider looking ahead to see if the next
                 // p is a number and if so, initialize and array
@@ -140,7 +138,7 @@ export class DefaultDeepStorage<State> implements DeepStorage<State> {
         return currentState;
     }
     deep = <DeepState>(...path: Path): DeepStorage<DeepState> => {
-        return new DefaultDeepStorage<DeepState>(this.stateIn<DeepState>(...path), ...this.path);
+        return new NestedDeepStorage<State, DeepState>(path, this);
     }
     subscription = (callback: StateUpdateCallback) => {
         const subscriberId = this.id++;
@@ -162,13 +160,56 @@ export class DefaultDeepStorage<State> implements DeepStorage<State> {
     }
 }
 
+export class NestedDeepStorage<RootState, State> implements DeepStorage<State> {
+
+    constructor(public path: Path, public root: DeepStorage<RootState>) {
+    }
+
+    setIn = (...path: stringOrNumber[]) => <DeepState>(newValue: DeepState): void => {
+        return this.root.setIn(...this.path.concat(path))(newValue);
+    }
+
+    update = (callback: (s: State) => State): void => {
+        return this.root.updateIn(...this.path)(callback);
+    }
+
+    updateIn = (...path: stringOrNumber[]) => <DeepState>(callback: (s: DeepState) => DeepState): void => {
+        return this.root.updateIn(...this.path.concat(path))(callback);
+    }
+
+    updateProperty = <Key extends keyof State>(key: Key, callback: (s: State[Key]) => State[Key]): void => {
+        return this.root.updateIn(...this.path.concat(key))(callback);
+    }
+
+    get state() { return this.root.stateIn<State>(...this.path); }
+
+    stateIn = <DeepState>(...path: stringOrNumber[]): DeepState => {
+        return this.root.stateIn(...this.path.concat(path));
+    }
+    deep = <DeepState>(...path: stringOrNumber[]): DeepStorage<DeepState> => {
+        return this.root.deep(...this.path.concat(path));
+    }
+    subscription = (callback: StateUpdateCallback): DeepSubscription => {
+        const rootSubscription = this.root.subscription((path, newState, oldState) => {
+            callback(path.slice(path.length - this.path.length, path.length), newState, oldState);
+        });
+        return {
+            subscribeTo: (...path: Path) => {
+                return rootSubscription.subscribeTo(...this.path.concat(path));
+            },
+            cancel: rootSubscription.cancel
+        }
+    }
+
+}
+
 function numberOrString(value: string): stringOrNumber {
     const parsed = parseInt(value);
     return parsed.toString() === value ? parsed : value;
 }
 
 export function parsePath(path: Path | stringOrNumber): Path {
-    if(path instanceof Array) {
+    if (path instanceof Array) {
         return path;
     } else if (typeof path === 'number') {
         return [path];
@@ -177,9 +218,9 @@ export function parsePath(path: Path | stringOrNumber): Path {
     }
 }
 
-export function parsePaths(paths: {[key: string]: Path | stringOrNumber}): {[key: string]: Path}  {
-    const result: {[key: string]: Path} = {};
-    for(let key in paths) {
+export function parsePaths(paths: { [key: string]: Path | stringOrNumber }): { [key: string]: Path } {
+    const result: { [key: string]: Path } = {};
+    for (let key in paths) {
         result[key] = parsePath(paths[key]);
     }
     return result;
