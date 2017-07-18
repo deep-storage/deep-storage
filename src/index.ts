@@ -78,8 +78,6 @@ export interface DeepSubscription {
 export type stringOrNumber = string | number;
 export type Path = stringOrNumber[];
 
-export default <State>(s: State): DeepStorage<State> => new DefaultDeepStorage(s);
-
 export class DefaultDeepStorage<State> implements DeepStorage<State> {
 
     private id: number = 0;
@@ -225,3 +223,6 @@ export function parsePaths(paths: { [key: string]: Path | stringOrNumber }): { [
     }
     return result;
 }
+
+export const deepStorage = <State>(s: State): DeepStorage<State> => new DefaultDeepStorage(s);
+export default deepStorage;
