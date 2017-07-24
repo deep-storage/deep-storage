@@ -32,13 +32,13 @@ export class DefaultDeepAsync<Request, Response> implements DeepAsync<Request, R
     run = async (request: Request): Promise<DeepAsyncData<Request, Response>> => {
         // todo: probably want to queue this
         if (this.status === AsyncStatus.Running) throw new AlreadyRunningError();
-        this.storage.update(state => ({ ...state, status: AsyncStatus.Running, request, response: undefined, error: undefined }));
+        await this.storage.update(state => ({ ...state, status: AsyncStatus.Running, request, response: undefined, error: undefined }));
         try {
             const response = await this.process(request);
-            this.storage.update(state => ({ ...state, status: AsyncStatus.Succeeded, response, error: undefined }));
+            await this.storage.update(state => ({ ...state, status: AsyncStatus.Succeeded, response, error: undefined }));
             return this.storage.state;
         } catch (error) {
-            this.storage.update(state => ({ ...state, status: AsyncStatus.Failed, error, response: undefined }));
+            await this.storage.update(state => ({ ...state, status: AsyncStatus.Failed, error, response: undefined }));
             return this.storage.state;
         }
     }

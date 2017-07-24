@@ -14,23 +14,23 @@ export interface DeepStorage<State> extends DeepSubscriptions {
      * sets a value in deep storage by path and notifies subscribers. shortcut for
      * updateIn where the old value is ignored
      */
-    setIn: (...path: Path) => <DeepState>(newValue: DeepState) => void;
+    setIn: (...path: Path) => <DeepState>(newValue: DeepState) => Promise<DeepState>;
 
     /**
      * Updates the whole state and notifies subscribers
      */
-    update: (callback: (s: State) => State) => void;
+    update: (callback: (s: State) => State) => Promise<State>;
 
     /**
      * Updates a value in deep storage by path and notifies subscribers. Must not 
      * mutate the oldValue
      */
-    updateIn: (...path: Path) => <DeepState>(callback: (s: DeepState) => DeepState) => void;
+    updateIn: (...path: Path) => <DeepState>(callback: (s: DeepState) => DeepState) => Promise<DeepState>;
 
     /**
      * Updates a property of the current state and notifies subscribers.
      */
-    updateProperty: <Key extends keyof State>(key: Key, callback: (s: State[Key]) => State[Key]) => void;
+    updateProperty: <Key extends keyof State>(key: Key, callback: (s: State[Key]) => State[Key]) => Promise<State[Key]>;
 
     /**
      * Returns the state that this deep storage is managing
@@ -85,14 +85,14 @@ export class DefaultDeepStorage<State> implements DeepStorage<State> {
     private subscriptions: { [key: number]: { paths: Path[], callback: StateUpdateCallback } } = {};
     constructor(public state: State) {
     }
-    update = (callback: (s: State) => State): void => {
+    update = (callback: (s: State) => State): Promise<State> => {
         return this.updateIn()(callback);
     }
-    updateProperty = <Key extends keyof State>(key: Key, callback: (s: State[Key]) => State[Key]): void => {
+    updateProperty = <Key extends keyof State>(key: Key, callback: (s: State[Key]) => State[Key]): Promise<State[Key]> => {
         return this.updateIn(key)(callback);
     }
     setIn = (...path: Path) => <DeepState>(newValue: DeepState) => {
-        this.updateIn(...path)(() => newValue);
+        return this.updateIn(...path)(() => newValue);
     }
     merge = (partial: {[P in keyof State]?: State[P]}) => {
         this.update(oldState => {
@@ -102,7 +102,7 @@ export class DefaultDeepStorage<State> implements DeepStorage<State> {
             return oldState;
         });
     }
-    updateIn = (...path: Path) => <DeepState>(callback: (s: DeepState) => DeepState): void => {
+    updateIn = (...path: Path) => async <DeepState>(callback: (s: DeepState) => DeepState): Promise<DeepState> => {
         const oldState = this.stateIn<DeepState>(...path);
         const newState = callback(oldState);
 
@@ -121,6 +121,7 @@ export class DefaultDeepStorage<State> implements DeepStorage<State> {
                 subscriber.callback(fullPath, newState, oldState)
             }
         }
+        return newState;
     }
     stateIn = <DeepState>(...path: Path) => {
         let currentState: any = this.state;
@@ -163,19 +164,19 @@ export class NestedDeepStorage<RootState, State> implements DeepStorage<State> {
     constructor(public path: Path, public root: DeepStorage<RootState>) {
     }
 
-    setIn = (...path: stringOrNumber[]) => <DeepState>(newValue: DeepState): void => {
+    setIn = (...path: stringOrNumber[]) => <DeepState>(newValue: DeepState): Promise<DeepState> => {
         return this.root.setIn(...this.path.concat(path))(newValue);
     }
 
-    update = (callback: (s: State) => State): void => {
+    update = (callback: (s: State) => State): Promise<State> => {
         return this.root.updateIn(...this.path)(callback);
     }
 
-    updateIn = (...path: stringOrNumber[]) => <DeepState>(callback: (s: DeepState) => DeepState): void => {
+    updateIn = (...path: stringOrNumber[]) => <DeepState>(callback: (s: DeepState) => DeepState): Promise<DeepState> => {
         return this.root.updateIn(...this.path.concat(path))(callback);
     }
 
-    updateProperty = <Key extends keyof State>(key: Key, callback: (s: State[Key]) => State[Key]): void => {
+    updateProperty = <Key extends keyof State>(key: Key, callback: (s: State[Key]) => State[Key]): Promise<State[Key]> => {
         return this.root.updateIn(...this.path.concat(key))(callback);
     }
 
