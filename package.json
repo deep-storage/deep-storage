@@ -2,7 +2,7 @@
   "name": "deep-storage",
   "version": "0.2.1",
   "description": "Simple observable state management for reactive applications",
-  "main": "lib/index.js",
+  "main": "./lib/index.js",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -18,8 +18,8 @@
   },
   "scripts": {
     "test": "jest",
-    "build": "rimraf lib && tsc"
+    "build": "rimraf lib && tsc -p tsconfig.prod.json"
   },
   "dependencies": {},
-  "types": "lib/index.d.ts"
+  "types": "./lib/index.d.ts"
 }
