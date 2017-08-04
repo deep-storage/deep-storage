@@ -15,6 +15,7 @@ export interface DeepAsyncData<Request, Response> {
 export interface DeepAsync<Request, Response> extends DeepAsyncData<Request, Response> {
     run(request: Request): Promise<DeepAsyncData<Request, Response>>;
     rerun(): Promise<DeepAsyncData<Request, Response>>;
+    storage: DeepStorage<DeepAsyncData<Request, Response>>;
 }
 export declare class AlreadyRunningError extends Error {
 }
@@ -30,5 +31,5 @@ export declare class DefaultDeepAsync<Request, Response> implements DeepAsync<Re
     readonly response: Response;
     readonly error: any;
 }
-declare const _default: <Request, Response>(storage: DeepStorage<DeepAsyncData<Request, Response>>, process: (request: Request) => Promise<Response>) => DefaultDeepAsync<Request, Response>;
+declare const _default: <Request, Response>(storage: DeepStorage<DeepAsyncData<Request, Response>, {}>, process: (request: Request) => Promise<Response>) => DefaultDeepAsync<Request, Response>;
 export default _default;
