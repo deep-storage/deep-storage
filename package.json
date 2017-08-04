@@ -1,6 +1,6 @@
 {
   "name": "deep-storage",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Simple observable state management for reactive applications",
   "main": "./lib/index.js",
   "license": "MIT",
