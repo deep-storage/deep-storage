@@ -8,7 +8,7 @@ export interface DeepSubscriptions {
     subscription: (callback: StateUpdateCallback) => DeepSubscription;
 }
 
-export interface DeepStorage<State> extends DeepSubscriptions {
+export interface DeepStorage<State, RootState = {}> extends DeepSubscriptions {
 
     /**
      * sets a value in deep storage by path and notifies subscribers. shortcut for
@@ -46,6 +46,12 @@ export interface DeepStorage<State> extends DeepSubscriptions {
      * Creates a new DeepStorage at this point in the object path
      */
     deep: <DeepState>(...path: Path) => DeepStorage<DeepState>;
+
+    /**
+     * Gets the root deep storage
+     */
+    root: () => DeepStorage<RootState>;
+
 }
 
 /**
@@ -78,7 +84,7 @@ export interface DeepSubscription {
 export type stringOrNumber = string | number;
 export type Path = stringOrNumber[];
 
-export class DefaultDeepStorage<State> implements DeepStorage<State> {
+export class DefaultDeepStorage<State> implements DeepStorage<State, State> {
 
     private id: number = 0;
 
@@ -137,7 +143,7 @@ export class DefaultDeepStorage<State> implements DeepStorage<State> {
         return currentState;
     }
     deep = <DeepState>(...path: Path): DeepStorage<DeepState> => {
-        return new NestedDeepStorage<State, DeepState>(path, this);
+        return new NestedDeepStorage<DeepState, State>(path, this);
     }
     subscription = (callback: StateUpdateCallback) => {
         const subscriberId = this.id++;
@@ -157,39 +163,40 @@ export class DefaultDeepStorage<State> implements DeepStorage<State> {
             cancel
         }
     }
+    root = () => this;
 }
 
-export class NestedDeepStorage<RootState, State> implements DeepStorage<State> {
+export class NestedDeepStorage<State, RootState> implements DeepStorage<State, RootState> {
 
-    constructor(public path: Path, public root: DeepStorage<RootState>) {
+    constructor(public path: Path, public rootStorage: DeepStorage<RootState>) {
     }
 
     setIn = (...path: stringOrNumber[]) => <DeepState>(newValue: DeepState): Promise<DeepState> => {
-        return this.root.setIn(...this.path.concat(path))(newValue);
+        return this.rootStorage.setIn(...this.path.concat(path))(newValue);
     }
 
     update = (callback: (s: State) => State): Promise<State> => {
-        return this.root.updateIn(...this.path)(callback);
+        return this.rootStorage.updateIn(...this.path)(callback);
     }
 
     updateIn = (...path: stringOrNumber[]) => <DeepState>(callback: (s: DeepState) => DeepState): Promise<DeepState> => {
-        return this.root.updateIn(...this.path.concat(path))(callback);
+        return this.rootStorage.updateIn(...this.path.concat(path))(callback);
     }
 
     updateProperty = <Key extends keyof State>(key: Key, callback: (s: State[Key]) => State[Key]): Promise<State[Key]> => {
-        return this.root.updateIn(...this.path.concat(key))(callback);
+        return this.rootStorage.updateIn(...this.path.concat(key))(callback);
     }
 
-    get state() { return this.root.stateIn<State>(...this.path); }
+    get state() { return this.rootStorage.stateIn<State>(...this.path); }
 
     stateIn = <DeepState>(...path: stringOrNumber[]): DeepState => {
-        return this.root.stateIn(...this.path.concat(path));
+        return this.rootStorage.stateIn(...this.path.concat(path));
     }
     deep = <DeepState>(...path: stringOrNumber[]): DeepStorage<DeepState> => {
-        return this.root.deep(...this.path.concat(path));
+        return this.rootStorage.deep(...this.path.concat(path));
     }
     subscription = (callback: StateUpdateCallback): DeepSubscription => {
-        const rootSubscription = this.root.subscription((path, newState, oldState) => {
+        const rootSubscription = this.rootStorage.subscription((path, newState, oldState) => {
             callback(path.slice(path.length - this.path.length, path.length), newState, oldState);
         });
         return {
@@ -199,7 +206,7 @@ export class NestedDeepStorage<RootState, State> implements DeepStorage<State> {
             cancel: rootSubscription.cancel
         }
     }
-
+    root = () => this.rootStorage;
 }
 
 function numberOrString(value: string): stringOrNumber {

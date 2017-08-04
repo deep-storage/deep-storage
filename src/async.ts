@@ -12,12 +12,13 @@ export interface DeepAsyncData<Request, Response> {
     completed: boolean;
     request?: Request;
     response?: Response;
-    error?: any
+    error?: any;
 }
 
 export interface DeepAsync<Request, Response> extends DeepAsyncData<Request, Response> {
     run(request: Request): Promise<DeepAsyncData<Request, Response>>;
     rerun(): Promise<DeepAsyncData<Request, Response>>;
+    storage: DeepStorage<DeepAsyncData<Request, Response>>
 }
 
 export class AlreadyRunningError extends Error {
