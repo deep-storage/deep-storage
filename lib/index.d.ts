@@ -41,6 +41,10 @@ export interface DeepStorage<State, RootState = {}> extends DeepSubscriptions {
      * Gets the root deep storage
      */
     root: () => DeepStorage<RootState>;
+    /**
+     * The path from the root to this storage
+     */
+    path: Path;
 }
 /**
  * A cancelable way to subscribe to paths in state
@@ -70,6 +74,7 @@ export declare class DefaultDeepStorage<State> implements DeepStorage<State, Sta
         cancel: () => void;
     };
     root: () => this;
+    path: Path;
 }
 export declare class NestedDeepStorage<State, RootState> implements DeepStorage<State, RootState> {
     path: Path;
