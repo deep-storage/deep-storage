@@ -10,6 +10,10 @@ export enum AsyncStatus {
 export interface DeepAsyncData<Request, Response> {
     status: AsyncStatus;
     completed: boolean;
+    succeeded: boolean;
+    running: boolean;
+    started: boolean;
+    failed: boolean;
     request?: Request;
     response?: Response;
     error?: any;
@@ -47,6 +51,10 @@ export class DefaultDeepAsync<Request, Response> implements DeepAsync<Request, R
         return this.run(this.request);
     }
     get status() { return this.storage.state.status; }
+    get running() { return this.storage.state.status === AsyncStatus.Running }
+    get started() { return this.storage.state.status !== AsyncStatus.Created }
+    get succeeded() { return this.storage.state.status === AsyncStatus.Succeeded }
+    get failed() { return this.storage.state.status === AsyncStatus.Failed }
     get completed() { return this.storage.state.status === AsyncStatus.Failed || this.storage.state.status == AsyncStatus.Succeeded }
     get request() { return this.storage.state.request };
     get response() { return this.storage.state.response };
