@@ -1,4 +1,4 @@
-import { DeepStorage } from "./index";
+import { DeepStorage, UsesDeepStorage } from "./index";
 
 export enum AsyncStatus {
     Created,
@@ -19,10 +19,11 @@ export interface DeepAsyncData<Request, Response> {
     error?: any;
 }
 
-export interface DeepAsync<Request, Response> extends DeepAsyncData<Request, Response> {
+export interface DeepAsync<Request, Response> extends
+    DeepAsyncData<Request, Response>,
+    UsesDeepStorage<DeepAsyncData<Request, Response>> {
     run(request: Request): Promise<DeepAsyncData<Request, Response>>;
     rerun(): Promise<DeepAsyncData<Request, Response>>;
-    storage: DeepStorage<DeepAsyncData<Request, Response>>
 }
 
 export class AlreadyRunningError extends Error {

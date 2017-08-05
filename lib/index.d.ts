@@ -53,6 +53,9 @@ export interface DeepSubscription {
     subscribeTo: (...path: Path) => void;
     cancel: () => void;
 }
+export interface UsesDeepStorage<State> {
+    storage: DeepStorage<State>;
+}
 export declare type stringOrNumber = string | number;
 export declare type Path = stringOrNumber[];
 export declare class DefaultDeepStorage<State> implements DeepStorage<State, State> {
