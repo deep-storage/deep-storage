@@ -24,6 +24,7 @@ export interface DeepAsync<Request, Response> extends
     UsesDeepStorage<DeepAsyncData<Request, Response>> {
     run(request: Request): Promise<DeepAsyncData<Request, Response>>;
     rerun(): Promise<DeepAsyncData<Request, Response>>;
+    update(response: Response): Promise<DeepAsyncData<Request, Response>>;
 }
 
 export class AlreadyRunningError extends Error {
@@ -48,8 +49,12 @@ export class DefaultDeepAsync<Request, Response> implements DeepAsync<Request, R
             return this.storage.state;
         }
     }
-    rerun(): Promise<DeepAsyncData<Request, Response>> {
+    rerun = (): Promise<DeepAsyncData<Request, Response>> => {
         return this.run(this.request);
+    }
+    update = async (response: Response): Promise<DeepAsyncData<Request, Response>> => {
+        await this.storage.update(state => ({ ...state, status: AsyncStatus.Succeeded, response, error: undefined }));
+        return this.storage.state;
     }
     get status() { return this.storage.state.status; }
     get running() { return this.storage.state.status === AsyncStatus.Running }
