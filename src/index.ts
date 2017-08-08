@@ -55,7 +55,13 @@ export interface DeepStorage<State, RootState = {}> extends DeepSubscriptions {
     /**
      * The path from the root to this storage
      */
-    path: Path
+    path: Path;
+
+    /**
+     * Returns an object with keys from State and values of 
+     * DeepStorage for that key
+     */
+    properties: {[P in keyof State]: DeepStorage<State[P]>}
 }
 
 /**
@@ -173,6 +179,14 @@ export class DefaultDeepStorage<State> implements DeepStorage<State, State> {
     }
     root = () => this;
     path: Path = [];
+    get properties() {
+        const result = {} as {[P in keyof State]: DeepStorage<State[P]>};
+        const state = this.state;
+        for (let key in state) {
+            result[key] = this.deep(key);
+        }
+        return result;
+    }
 }
 
 export class NestedDeepStorage<State, RootState> implements DeepStorage<State, RootState> {
@@ -216,6 +230,14 @@ export class NestedDeepStorage<State, RootState> implements DeepStorage<State, R
         }
     }
     root = () => this.rootStorage;
+    get properties() {
+        const result = {} as {[P in keyof State]: DeepStorage<State[P]>};
+        const state = this.state;
+        for (let key in state) {
+            result[key] = this.deep(key);
+        }
+        return result;
+    }
 }
 
 function numberOrString(value: string): stringOrNumber {

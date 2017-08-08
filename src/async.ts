@@ -67,9 +67,11 @@ export class DefaultDeepAsync<Request, Response> implements DeepAsync<Request, R
     get error() { return this.storage.state.error };
 }
 
-export default <Request, Response>(
+export const deepAsync = <Request, Response>(
     storage: DeepStorage<DeepAsyncData<Request, Response>>,
     process: (request: Request) => Promise<Response>
 ) => {
     return new DefaultDeepAsync(storage, process);
 }
+
+export default deepAsync;
