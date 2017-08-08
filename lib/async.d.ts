@@ -40,5 +40,5 @@ export declare class DefaultDeepAsync<Request, Response> implements DeepAsync<Re
     readonly response: Response;
     readonly error: any;
 }
-declare const _default: <Request, Response>(storage: DeepStorage<DeepAsyncData<Request, Response>, {}>, process: (request: Request) => Promise<Response>) => DefaultDeepAsync<Request, Response>;
-export default _default;
+export declare const deepAsync: <Request, Response>(storage: DeepStorage<DeepAsyncData<Request, Response>, {}>, process: (request: Request) => Promise<Response>) => DefaultDeepAsync<Request, Response>;
+export default deepAsync;

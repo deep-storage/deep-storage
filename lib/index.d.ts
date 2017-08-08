@@ -45,6 +45,13 @@ export interface DeepStorage<State, RootState = {}> extends DeepSubscriptions {
      * The path from the root to this storage
      */
     path: Path;
+    /**
+     * Returns an object with keys from State and values of
+     * DeepStorage for that key
+     */
+    properties: {
+        [P in keyof State]: DeepStorage<State[P]>;
+    };
 }
 /**
  * A cancelable way to subscribe to paths in state
@@ -78,6 +85,9 @@ export declare class DefaultDeepStorage<State> implements DeepStorage<State, Sta
     };
     root: () => this;
     path: Path;
+    readonly properties: {
+        [P in keyof State]: DeepStorage<State[P], {}>;
+    };
 }
 export declare class NestedDeepStorage<State, RootState> implements DeepStorage<State, RootState> {
     path: Path;
@@ -92,6 +102,9 @@ export declare class NestedDeepStorage<State, RootState> implements DeepStorage<
     deep: <DeepState>(...path: (string | number)[]) => DeepStorage<DeepState, {}>;
     subscription: (callback: StateUpdateCallback) => DeepSubscription;
     root: () => DeepStorage<RootState, {}>;
+    readonly properties: {
+        [P in keyof State]: DeepStorage<State[P], {}>;
+    };
 }
 export declare function parsePath(path: Path | stringOrNumber): Path;
 export declare function parsePaths(paths: {
