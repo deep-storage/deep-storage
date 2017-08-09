@@ -1,4 +1,4 @@
-import deepStorage from '../';
+import deepStorage, { isPathMatch } from '../';
 
 test('stateIn', () => {
   const storage = deepStorage({
@@ -43,5 +43,34 @@ test('subscription', (done) => {
   });
   subscription.subscribeTo('todos');
   storage.setIn('todos', 'abc', 'title')<string>('test');
+  subscription.cancel();
+});
+
+test('isPathMatch', () => {
+  // state change path of [] and subscription path of ['test']
+  expect(isPathMatch([], ['test'])).toBeTruthy();
+
+  expect(isPathMatch(['test'], ['test'])).toBeTruthy();
+
+  expect(isPathMatch(['test', 'something'], ['test'])).toBeTruthy();
+
+  expect(isPathMatch(['test'], ['test', 'something'])).toBeFalsy();
+
+  expect(isPathMatch(['notTest'], ['test'])).toBeFalsy();
+});
+
+
+test('subscription and update', (done) => {
+  const storage = deepStorage({
+    todos: []
+  });
+  const subscription = storage.subscription((path, newState, oldState) => {
+    expect(path).toEqual([]);
+    expect(newState).toEqual({todos: [1]});
+    expect(oldState).toEqual({todos: []});
+    done();
+  });
+  subscription.subscribeTo('todos');
+  storage.update(prevState => ({ ...prevState, todos: [1] }));
   subscription.cancel();
 });

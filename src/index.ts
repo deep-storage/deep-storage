@@ -72,13 +72,13 @@ export interface DeepStorage<State, RootState = {}> extends DeepSubscriptions {
  * 
  * etc.
  * 
- * @param full the full array to check, must not be null
- * @param partial the partial array to check
+ * @param stateChangePath the full array to check, must not be null
+ * @param subscriptionPath the partial array to check
  */
-function isPrefix<T>(full: T[], partial: T[]) {
-    if (partial.length > full.length) return false;
-    for (let i = 0; i < partial.length; i++) {
-        if (partial[i] !== full[i]) return false;
+export function isPathMatch<T>(stateChangePath: T[], subscriptionPath: T[]) {
+    if(stateChangePath.length === 0) return true;
+    for (let i = 0; i < subscriptionPath.length; i++) {
+        if (stateChangePath[i] !== subscriptionPath[i]) return false;
     }
     return true;
 }
@@ -133,12 +133,12 @@ export class DefaultDeepStorage<State> implements DeepStorage<State, State> {
             // parent objects too so that reference equality checks work in react
             this.stateIn(...path.slice(0, path.length - 1))[path[path.length - 1]] = newState;
         }
-        const fullPath = path;
+        const stateChangePath = path;
         for (let subscriberId in this.subscriptions) {
             const subscriber = this.subscriptions[subscriberId];
             // check to see if we have any matches
-            if (subscriber.paths.some(subscriberPath => isPrefix(fullPath, subscriberPath))) {
-                subscriber.callback(fullPath, newState, oldState)
+            if (subscriber.paths.some(subscriberPath => isPathMatch(stateChangePath, subscriberPath))) {
+                subscriber.callback(stateChangePath, newState, oldState)
             }
         }
         return newState;
