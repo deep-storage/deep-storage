@@ -54,9 +54,12 @@ test('isPathMatch', () => {
 
   expect(isPathMatch(['test', 'something'], ['test'])).toBeTruthy();
 
-  expect(isPathMatch(['test'], ['test', 'something'])).toBeFalsy();
+  expect(isPathMatch(['test'], ['test', 'something'])).toBeTruthy();
 
   expect(isPathMatch(['notTest'], ['test'])).toBeFalsy();
+
+  expect(isPathMatch(['app', 'trello'], ['app', 'trello', 'connections'])).toBeTruthy();
+
 });
 
 
@@ -66,8 +69,8 @@ test('subscription and update', (done) => {
   });
   const subscription = storage.subscription((path, newState, oldState) => {
     expect(path).toEqual([]);
-    expect(newState).toEqual({todos: [1]});
-    expect(oldState).toEqual({todos: []});
+    expect(newState).toEqual({ todos: [1] });
+    expect(oldState).toEqual({ todos: [] });
     done();
   });
   subscription.subscribeTo('todos');

@@ -76,8 +76,7 @@ export interface DeepStorage<State, RootState = {}> extends DeepSubscriptions {
  * @param subscriptionPath the partial array to check
  */
 export function isPathMatch<T>(stateChangePath: T[], subscriptionPath: T[]) {
-    if(stateChangePath.length === 0) return true;
-    for (let i = 0; i < subscriptionPath.length; i++) {
+    for (let i = 0; i < Math.min(subscriptionPath.length, stateChangePath.length); i++) {
         if (stateChangePath[i] !== subscriptionPath[i]) return false;
     }
     return true;
