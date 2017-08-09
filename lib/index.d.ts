@@ -54,6 +54,18 @@ export interface DeepStorage<State, RootState = {}> extends DeepSubscriptions {
     };
 }
 /**
+ * Is one array a prefix on another e.g.
+ *
+ * [] is a prefix of any array
+ * ['asdf'] is a prefix of ['asdf', ...]
+ *
+ * etc.
+ *
+ * @param stateChangePath the full array to check, must not be null
+ * @param subscriptionPath the partial array to check
+ */
+export declare function isPathMatch<T>(stateChangePath: T[], subscriptionPath: T[]): boolean;
+/**
  * A cancelable way to subscribe to paths in state
  */
 export interface DeepSubscription {
