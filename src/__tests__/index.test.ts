@@ -22,7 +22,7 @@ test('props', () => {
 test('init', () => {
   const storage = deepStorage({
   });
-  const testStorage = storage.init('test')(1);
+  const testStorage = storage.deepInit('test')(1);
   expect(testStorage.state).toEqual(1);
 });
 

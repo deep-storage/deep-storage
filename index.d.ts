@@ -41,7 +41,8 @@ export interface DeepStorage<State, RootState = {}> extends DeepSubscriptions {
      * Creates a new DeepStorage at this point in the object path and
      * gives it an initial value if one hasn't already been set
      */
-    init: <DeepState>(...path: Path) => (deepState: DeepState) => DeepStorage<DeepState>;
+    deepInit: <DeepState>(...path: Path) => (deepState: DeepState) => DeepStorage<DeepState, RootState>;
+    init: (state: State) => DeepStorage<State, RootState>;
     /**
      * Gets the root deep storage
      */
@@ -96,7 +97,8 @@ export declare class DefaultDeepStorage<State> implements DeepStorage<State, Sta
     }) => void;
     updateIn: (...path: (string | number)[]) => <DeepState>(callback: (s: DeepState) => DeepState) => Promise<DeepState>;
     stateIn: <DeepState>(...path: (string | number)[]) => any;
-    init: <DeepState>(...path: (string | number)[]) => (deepState: DeepState) => DeepStorage<DeepState, {}>;
+    init: (state: State) => DeepStorage<State, State>;
+    deepInit: <DeepState>(...path: (string | number)[]) => (deepState: DeepState) => DeepStorage<DeepState, State>;
     deep: <DeepState>(...path: (string | number)[]) => DeepStorage<DeepState, {}>;
     subscription: (callback: StateUpdateCallback) => {
         subscribeTo: (...path: (string | number)[]) => void;
@@ -110,18 +112,19 @@ export declare class DefaultDeepStorage<State> implements DeepStorage<State, Sta
 }
 export declare class NestedDeepStorage<State, RootState> implements DeepStorage<State, RootState> {
     path: Path;
-    rootStorage: DeepStorage<RootState>;
-    constructor(path: Path, rootStorage: DeepStorage<RootState>);
+    rootStorage: DeepStorage<RootState, RootState>;
+    constructor(path: Path, rootStorage: DeepStorage<RootState, RootState>);
     setIn: (...path: (string | number)[]) => <DeepState>(newValue: DeepState) => Promise<DeepState>;
     update: (callback: (s: State) => State) => Promise<State>;
     updateIn: (...path: (string | number)[]) => <DeepState>(callback: (s: DeepState) => DeepState) => Promise<DeepState>;
     updateProperty: <Key extends keyof State>(key: Key, callback: (s: State[Key]) => State[Key]) => Promise<State[Key]>;
     readonly state: State;
     stateIn: <DeepState>(...path: (string | number)[]) => DeepState;
-    init: <DeepState>(...path: (string | number)[]) => (deepState: DeepState) => DeepStorage<DeepState, {}>;
+    init: (state: State) => DeepStorage<State, RootState>;
+    deepInit: <DeepState>(...path: (string | number)[]) => (deepState: DeepState) => DeepStorage<DeepState, RootState>;
     deep: <DeepState>(...path: (string | number)[]) => DeepStorage<DeepState, {}>;
     subscription: (callback: StateUpdateCallback) => DeepSubscription;
-    root: () => DeepStorage<RootState, {}>;
+    root: () => DeepStorage<RootState, RootState>;
     readonly props: {
         [P in keyof State]: DeepStorage<State[P], {}>;
     };
