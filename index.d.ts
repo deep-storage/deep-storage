@@ -38,6 +38,11 @@ export interface DeepStorage<State, RootState = {}> extends DeepSubscriptions {
      */
     deep: <DeepState>(...path: Path) => DeepStorage<DeepState>;
     /**
+     * Creates a new DeepStorage at this point in the object path and
+     * gives it an initial value if one hasn't already been set
+     */
+    init: <DeepState>(...path: Path) => (deepState: DeepState) => DeepStorage<DeepState>;
+    /**
      * Gets the root deep storage
      */
     root: () => DeepStorage<RootState>;
@@ -80,6 +85,7 @@ export declare type Path = stringOrNumber[];
 export declare class DefaultDeepStorage<State> implements DeepStorage<State, State> {
     state: State;
     private id;
+    private initialStates;
     private subscriptions;
     constructor(state: State);
     update: (callback: (s: State) => State) => Promise<State>;
@@ -90,6 +96,7 @@ export declare class DefaultDeepStorage<State> implements DeepStorage<State, Sta
     }) => void;
     updateIn: (...path: (string | number)[]) => <DeepState>(callback: (s: DeepState) => DeepState) => Promise<DeepState>;
     stateIn: <DeepState>(...path: (string | number)[]) => any;
+    init: <DeepState>(...path: (string | number)[]) => (deepState: DeepState) => DeepStorage<DeepState, {}>;
     deep: <DeepState>(...path: (string | number)[]) => DeepStorage<DeepState, {}>;
     subscription: (callback: StateUpdateCallback) => {
         subscribeTo: (...path: (string | number)[]) => void;
@@ -111,6 +118,7 @@ export declare class NestedDeepStorage<State, RootState> implements DeepStorage<
     updateProperty: <Key extends keyof State>(key: Key, callback: (s: State[Key]) => State[Key]) => Promise<State[Key]>;
     readonly state: State;
     stateIn: <DeepState>(...path: (string | number)[]) => DeepState;
+    init: <DeepState>(...path: (string | number)[]) => (deepState: DeepState) => DeepStorage<DeepState, {}>;
     deep: <DeepState>(...path: (string | number)[]) => DeepStorage<DeepState, {}>;
     subscription: (callback: StateUpdateCallback) => DeepSubscription;
     root: () => DeepStorage<RootState, {}>;
