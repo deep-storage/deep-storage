@@ -7,6 +7,25 @@ test('stateIn', () => {
   expect(storage.stateIn('todos', 'abc', 'title')).toBe('do something');
 });
 
+test('props', () => {
+  const storage = deepStorage({
+    value1: 1,
+    value2: 'two'
+  });
+  const props = storage.props;
+  expect(props.value1).toBeTruthy();
+  expect(props.value2).toBeTruthy();
+  expect(props.value1.state).toEqual(1);
+  expect(props.value2.state).toEqual('two');
+});
+
+test('init', () => {
+  const storage = deepStorage({
+  });
+  const testStorage = storage.init('test')(1);
+  expect(testStorage.state).toEqual(1);
+});
+
 test('deep', () => {
   const storage = deepStorage({
     todos: { abc: { id: 'abc', title: 'do something' } }

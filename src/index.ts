@@ -48,6 +48,12 @@ export interface DeepStorage<State, RootState = {}> extends DeepSubscriptions {
     deep: <DeepState>(...path: Path) => DeepStorage<DeepState>;
 
     /**
+     * Creates a new DeepStorage at this point in the object path and
+     * gives it an initial value if one hasn't already been set
+     */
+    init: <DeepState>(...path: Path) => (deepState: DeepState) => DeepStorage<DeepState>;
+
+    /**
      * Gets the root deep storage
      */
     root: () => DeepStorage<RootState>;
@@ -100,6 +106,7 @@ export type Path = stringOrNumber[];
 export class DefaultDeepStorage<State> implements DeepStorage<State, State> {
 
     private id: number = 0;
+    private initialStates: {[key: string]: any} = {};
 
     private subscriptions: { [key: number]: { paths: Path[], callback: StateUpdateCallback } } = {};
     constructor(public state: State) {
@@ -143,17 +150,22 @@ export class DefaultDeepStorage<State> implements DeepStorage<State, State> {
         return newState;
     }
     stateIn = <DeepState>(...path: Path) => {
-        let currentState: any = this.state;
+        let currentState: any = typeof this.state === 'undefined' ? this.initialStates[''] : this.state;
         for (let p of path) {
             if (!(p in currentState)) {
                 // todo: consider looking ahead to see if the next
                 // p is a number and if so, initialize and array
                 // instead of an object
-                currentState[p] = {};
+                const init = this.initialStates[path.join('.')];
+                currentState[p] = typeof init === 'undefined' ? {} : init;
             }
             currentState = currentState[p];
         }
         return currentState;
+    }
+    init = <DeepState>(...path: Path) => (deepState: DeepState): DeepStorage<DeepState> => {
+        this.initialStates[path.join('.')] = deepState;
+        return new NestedDeepStorage<DeepState, State>(path, this);
     }
     deep = <DeepState>(...path: Path): DeepStorage<DeepState> => {
         return new NestedDeepStorage<DeepState, State>(path, this);
@@ -180,8 +192,7 @@ export class DefaultDeepStorage<State> implements DeepStorage<State, State> {
     path: Path = [];
     get props() {
         const result = {} as {[P in keyof State]: DeepStorage<State[P]>};
-        const state = this.state;
-        for (let key in state) {
+        for (let key of Object.keys(this.state)) {
             result[key] = this.deep(key);
         }
         return result;
@@ -214,6 +225,9 @@ export class NestedDeepStorage<State, RootState> implements DeepStorage<State, R
     stateIn = <DeepState>(...path: stringOrNumber[]): DeepState => {
         return this.rootStorage.stateIn(...this.path.concat(path));
     }
+    init = <DeepState>(...path: stringOrNumber[]) => (deepState: DeepState): DeepStorage<DeepState> => {
+        return this.rootStorage.init<DeepState>(...this.path.concat(path))(deepState);
+    }
     deep = <DeepState>(...path: stringOrNumber[]): DeepStorage<DeepState> => {
         return this.rootStorage.deep(...this.path.concat(path));
     }
@@ -231,8 +245,7 @@ export class NestedDeepStorage<State, RootState> implements DeepStorage<State, R
     root = () => this.rootStorage;
     get props() {
         const result = {} as {[P in keyof State]: DeepStorage<State[P]>};
-        const state = this.state;
-        for (let key in state) {
+        for (let key of Object.keys(this.state)) {
             result[key] = this.deep(key);
         }
         return result;
