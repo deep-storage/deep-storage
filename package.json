@@ -18,7 +18,8 @@
   },
   "scripts": {
     "test": "jest",
-    "build": "rimraf lib && tsc -p tsconfig.prod.json"
+    "build": "rimraf lib *.d.ts && tsc -p tsconfig.prod.json",
+    "publish-patch": "yarn build && git commit -am 'build' && git push && npm version patch && git push && npm publish"
   },
   "dependencies": {},
   "types": "./lib/index.d.ts"

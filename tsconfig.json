@@ -7,6 +7,7 @@
         "target": "es5",
         "jsx": "react",
         "declaration": true,
+        "declarationDir": ".",
         "lib": [
             "es6",
             "dom"
