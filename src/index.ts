@@ -151,8 +151,16 @@ export class DefaultDeepStorage<State> implements DeepStorage<State, State> {
         }
         return newState;
     }
+    cloneInitialState = (...path: Path) => {
+        const initialState = this.initialStates[path.join('.')];
+        if(typeof initialState === 'undefined') {
+            return undefined;
+        } else {
+            return JSON.parse(JSON.stringify(initialState));
+        }
+    }
     stateIn = <DeepState>(...path: Path) => {
-        let currentState: any = typeof this.state === 'undefined' ? this.initialStates[''] : this.state;
+        let currentState: any = typeof this.state === 'undefined' ? this.cloneInitialState() : this.state;
         let pathSoFar = [];
         for (let p of path) {
             pathSoFar.push(p);
@@ -160,7 +168,7 @@ export class DefaultDeepStorage<State> implements DeepStorage<State, State> {
                 // todo: consider looking ahead to see if the next
                 // p is a number and if so, initialize and array
                 // instead of an object
-                const init = this.initialStates[pathSoFar.join('.')];
+                const init = this.cloneInitialState(...pathSoFar);
                 currentState[p] = typeof init === 'undefined' ? {} : init;
             }
             currentState = currentState[p];

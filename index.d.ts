@@ -96,6 +96,7 @@ export declare class DefaultDeepStorage<State> implements DeepStorage<State, Sta
         [P in keyof State]?: State[P];
     }) => void;
     updateIn: (...path: (string | number)[]) => <DeepState>(callback: (s: DeepState) => DeepState) => Promise<DeepState>;
+    cloneInitialState: (...path: (string | number)[]) => any;
     stateIn: <DeepState>(...path: (string | number)[]) => any;
     init: (state: State) => DeepStorage<State, State>;
     deepInit: <DeepState>(...path: (string | number)[]) => (deepState: DeepState) => DeepStorage<DeepState, State>;
