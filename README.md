@@ -11,11 +11,6 @@ Deep Storage provides observable state for reactive applications in JavaScript.
 
 [The Deep Storage user manual](https://deep-storage.gitbooks.io/deep-storage/content/)
 
-## Sample SAAS App
-
-View a [SAAS starter app](https://github.com/deep-storage/examples/tree/master/react-saas) using
-deep storage.
-
 ## TodoMVC
 
 See an [implementation of TodoMVC that uses Deep Storage](https://github.com/deep-storage/examples/tree/master/react-todomvc).
