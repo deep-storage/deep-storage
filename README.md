@@ -61,3 +61,4 @@ See an [implementation of TodoMVC that uses Deep Storage](https://github.com/dee
     setInterval(function tick() {
         storage.updateIn('timer')(prev => prev + 1);
     }, 1000);
+
