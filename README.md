@@ -38,7 +38,7 @@ See an [implementation of TodoMVC that uses Deep Storage](https://github.com/dee
 
 ### 2. Create a view that responds to changes in state
 
-    import {deep} from 'deep-storage-react';
+    import {connect} from 'deep-storage-react';
 
     class TimerView extends React.Component {
         render() {
@@ -53,7 +53,7 @@ See an [implementation of TodoMVC that uses Deep Storage](https://github.com/dee
         }
     };
 
-    const DeepTimerView = deep({timer: storage.deep('timer')})(TimerView);
+    const DeepTimerView = connect({timer: storage.deep('timer')})(TimerView);
 
     ReactDOM.render((
         <DeepTimerView resetTimer={resetTimer}/>
