@@ -14,6 +14,11 @@ export interface DeepStorage<State, RootState = {}> extends DeepSubscriptions {
      */
     setIn: (...path: Path) => <DeepState>(newValue: DeepState) => Promise<DeepState>;
     /**
+     * sets a value in deep storage and notifies subscribers. shortcut for
+     * update where the old value is ignored
+     */
+    set: (newValue: State) => Promise<State>;
+    /**
      * Updates the whole state and notifies subscribers
      */
     update: (callback: (s: State) => State) => Promise<State>;
@@ -92,6 +97,7 @@ export declare class DefaultDeepStorage<State> implements DeepStorage<State, Sta
     constructor(state: State);
     update: (callback: (s: State) => State) => Promise<State>;
     updateProperty: <Key extends keyof State>(key: Key, callback: (s: State[Key]) => State[Key]) => Promise<State[Key]>;
+    set: (newValue: State) => Promise<State>;
     setIn: (...path: (string | number)[]) => <DeepState>(newValue: DeepState) => Promise<DeepState>;
     merge: (partial: {
         [P in keyof State]?: State[P];
@@ -117,6 +123,7 @@ export declare class NestedDeepStorage<State, RootState> implements DeepStorage<
     rootStorage: DeepStorage<RootState, RootState>;
     constructor(path: Path, rootStorage: DeepStorage<RootState, RootState>);
     setIn: (...path: (string | number)[]) => <DeepState>(newValue: DeepState) => Promise<DeepState>;
+    set: (newValue: State) => Promise<State>;
     update: (callback: (s: State) => State) => Promise<State>;
     updateIn: (...path: (string | number)[]) => <DeepState>(callback: (s: DeepState) => DeepState) => Promise<DeepState>;
     updateProperty: <Key extends keyof State>(key: Key, callback: (s: State[Key]) => State[Key]) => Promise<State[Key]>;

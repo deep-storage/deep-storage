@@ -9,11 +9,6 @@ export enum AsyncStatus {
 
 export interface DeepAsyncState<Request, Response> {
     status: AsyncStatus;
-    completed: boolean;
-    succeeded: boolean;
-    running: boolean;
-    started: boolean;
-    failed: boolean;
     request?: Request;
     response?: Response;
     error?: any;
@@ -22,6 +17,11 @@ export interface DeepAsyncState<Request, Response> {
 export interface DeepAsync<Request, Response> extends
     DeepAsyncState<Request, Response>,
     UsesDeepStorage<DeepAsyncState<Request, Response>> {
+    completed: boolean;
+    succeeded: boolean;
+    running: boolean;
+    started: boolean;
+    failed: boolean;
     run(request: Request): Promise<DeepAsyncState<Request, Response>>;
     rerun(): Promise<DeepAsyncState<Request, Response>>;
     updateResponse(updater: (prevState: Response) => Response): Promise<DeepAsyncState<Request, Response>>;
@@ -53,7 +53,14 @@ export class DefaultDeepAsync<Request, Response> implements DeepAsync<Request, R
         return this.run(this.request);
     }
     updateResponse = async (updater: (prevState: Response) => Response): Promise<DeepAsyncState<Request, Response>> => {
-        await this.storage.update((state: DeepAsyncState<Request, Response>) => ({ ...state, status: AsyncStatus.Succeeded, updater(state.response), error: undefined }));
+        await this.storage.update(
+            (state: DeepAsyncState<Request, Response>) =>
+                ({
+                    ...state,
+                    status: AsyncStatus.Succeeded,
+                    response: updater(state.response), 
+                    error: undefined
+                }));
         return this.storage.state;
     }
     get status() { return this.storage.state.status; }
@@ -72,8 +79,7 @@ export const deepAsync = async <Request, Response>(
     process: (request: Request) => Promise<Response>
 ) => {
     await storage.set({
-        status: AsyncStatus.Created,
-        
+        status: AsyncStatus.Created
     });
     return new DefaultDeepAsync(storage, process);
 }
