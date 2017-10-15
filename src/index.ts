@@ -19,6 +19,12 @@ export interface DeepStorage<State, RootState = {}> extends DeepSubscriptions {
     setIn: (...path: Path) => <DeepState>(newValue: DeepState) => Promise<DeepState>;
 
     /**
+     * sets a value in deep storage and notifies subscribers. shortcut for
+     * update where the old value is ignored
+     */
+    set: (newValue: State) => Promise<State>;
+
+    /**
      * Updates the whole state and notifies subscribers
      */
     update: (callback: (s: State) => State) => Promise<State>;
@@ -121,6 +127,9 @@ export class DefaultDeepStorage<State> implements DeepStorage<State, State> {
     updateProperty = <Key extends keyof State>(key: Key, callback: (s: State[Key]) => State[Key]): Promise<State[Key]> => {
         return this.updateIn(key)(callback);
     }
+    set = (newValue: State) => {
+        return this.updateIn()(() => newValue);
+    }
     setIn = (...path: Path) => <DeepState>(newValue: DeepState) => {
         return this.updateIn(...path)(() => newValue);
     }
@@ -208,11 +217,11 @@ export class DefaultDeepStorage<State> implements DeepStorage<State, State> {
     root = () => this;
     path: Path = [];
     get props() {
-        const result = {} as {[P in keyof State]: DeepStorage<State[P]>};
+        const result: any = {};
         for (let key of Object.keys(this.state)) {
             result[key] = this.deep(key);
         }
-        return result;
+        return result as {[P in keyof State]: DeepStorage<State[P]>};
     }
 }
 
@@ -223,6 +232,10 @@ export class NestedDeepStorage<State, RootState> implements DeepStorage<State, R
 
     setIn = (...path: stringOrNumber[]) => <DeepState>(newValue: DeepState): Promise<DeepState> => {
         return this.rootStorage.setIn(...this.path.concat(path))(newValue);
+    }
+
+    set = (newValue: State): Promise<State> => {
+        return this.rootStorage.setIn(...this.path)(newValue);
     }
 
     update = (callback: (s: State) => State): Promise<State> => {
@@ -264,11 +277,11 @@ export class NestedDeepStorage<State, RootState> implements DeepStorage<State, R
     }
     root = () => this.rootStorage;
     get props() {
-        const result = {} as {[P in keyof State]: DeepStorage<State[P]>};
+        const result: any = {};
         for (let key of Object.keys(this.state)) {
             result[key] = this.deep(key);
         }
-        return result;
+        return result as {[P in keyof State]: DeepStorage<State[P]>};
     }
 }
 

@@ -7,7 +7,7 @@ export enum AsyncStatus {
     Succeeded
 }
 
-export interface DeepAsyncData<Request, Response> {
+export interface DeepAsyncState<Request, Response> {
     status: AsyncStatus;
     completed: boolean;
     succeeded: boolean;
@@ -20,11 +20,11 @@ export interface DeepAsyncData<Request, Response> {
 }
 
 export interface DeepAsync<Request, Response> extends
-    DeepAsyncData<Request, Response>,
-    UsesDeepStorage<DeepAsyncData<Request, Response>> {
-    run(request: Request): Promise<DeepAsyncData<Request, Response>>;
-    rerun(): Promise<DeepAsyncData<Request, Response>>;
-    update(response: Response): Promise<DeepAsyncData<Request, Response>>;
+    DeepAsyncState<Request, Response>,
+    UsesDeepStorage<DeepAsyncState<Request, Response>> {
+    run(request: Request): Promise<DeepAsyncState<Request, Response>>;
+    rerun(): Promise<DeepAsyncState<Request, Response>>;
+    updateResponse(updater: (prevState: Response) => Response): Promise<DeepAsyncState<Request, Response>>;
 }
 
 export class AlreadyRunningError extends Error {
@@ -32,11 +32,11 @@ export class AlreadyRunningError extends Error {
 
 export class DefaultDeepAsync<Request, Response> implements DeepAsync<Request, Response> {
     constructor(
-        public storage: DeepStorage<DeepAsyncData<Request, Response>>,
+        public storage: DeepStorage<DeepAsyncState<Request, Response>>,
         public process: (request: Request) => Promise<Response>
     ) {
     }
-    run = async (request: Request): Promise<DeepAsyncData<Request, Response>> => {
+    run = async (request: Request): Promise<DeepAsyncState<Request, Response>> => {
         // todo: probably want to queue this
         if (this.status === AsyncStatus.Running) throw new AlreadyRunningError();
         await this.storage.update(state => ({ ...state, status: AsyncStatus.Running, request, response: undefined, error: undefined }));
@@ -49,11 +49,11 @@ export class DefaultDeepAsync<Request, Response> implements DeepAsync<Request, R
             return this.storage.state;
         }
     }
-    rerun = (): Promise<DeepAsyncData<Request, Response>> => {
+    rerun = (): Promise<DeepAsyncState<Request, Response>> => {
         return this.run(this.request);
     }
-    update = async (response: Response): Promise<DeepAsyncData<Request, Response>> => {
-        await this.storage.update(state => ({ ...state, status: AsyncStatus.Succeeded, response, error: undefined }));
+    updateResponse = async (updater: (prevState: Response) => Response): Promise<DeepAsyncState<Request, Response>> => {
+        await this.storage.update((state: DeepAsyncState<Request, Response>) => ({ ...state, status: AsyncStatus.Succeeded, updater(state.response), error: undefined }));
         return this.storage.state;
     }
     get status() { return this.storage.state.status; }
@@ -67,10 +67,14 @@ export class DefaultDeepAsync<Request, Response> implements DeepAsync<Request, R
     get error() { return this.storage.state.error };
 }
 
-export const deepAsync = <Request, Response>(
-    storage: DeepStorage<DeepAsyncData<Request, Response>>,
+export const deepAsync = async <Request, Response>(
+    storage: DeepStorage<DeepAsyncState<Request, Response>>,
     process: (request: Request) => Promise<Response>
 ) => {
+    await storage.set({
+        status: AsyncStatus.Created,
+        
+    });
     return new DefaultDeepAsync(storage, process);
 }
 
