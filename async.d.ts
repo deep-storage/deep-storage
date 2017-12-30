@@ -17,7 +17,7 @@ export interface DeepAsync<Response> extends DeepAsyncState<Response>, UsesDeepS
     started: boolean;
     failed: boolean;
     run(): Promise<DeepAsyncState<Response>>;
-    updateResponse(updater: (prevState: Response) => Response): Promise<DeepAsyncState<Response>>;
+    update(updater: (prevState: Response) => Response): Promise<DeepAsyncState<Response>>;
 }
 export declare class AlreadyRunningError extends Error {
 }
@@ -26,7 +26,7 @@ export declare class DefaultDeepAsync<Response> implements DeepAsync<Response> {
     process: () => Promise<Response>;
     constructor(storage: DeepStorage<DeepAsyncState<Response>>, process: () => Promise<Response>);
     run: () => Promise<DeepAsyncState<Response>>;
-    updateResponse: (updater: (prevState: Response) => Response) => Promise<DeepAsyncState<Response>>;
+    update: (updater: (prevState: Response) => Response) => Promise<DeepAsyncState<Response>>;
     readonly status: AsyncStatus;
     readonly running: boolean;
     readonly started: boolean;

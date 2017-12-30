@@ -13,16 +13,14 @@ export interface DeepAsyncState<Response> {
     error?: any;
 }
 
-export interface DeepAsync<Response> extends
-    DeepAsyncState<Response>,
-    UsesDeepStorage<DeepAsyncState<Response>> {
+export interface DeepAsync<Response> extends DeepAsyncState<Response>, UsesDeepStorage<DeepAsyncState<Response>> {
     completed: boolean;
     succeeded: boolean;
     running: boolean;
     started: boolean;
     failed: boolean;
     run(): Promise<DeepAsyncState<Response>>;
-    updateResponse(updater: (prevState: Response) => Response): Promise<DeepAsyncState<Response>>;
+    update(updater: (prevState: Response) => Response): Promise<DeepAsyncState<Response>>;
 }
 
 export class AlreadyRunningError extends Error {
@@ -47,13 +45,13 @@ export class DefaultDeepAsync<Response> implements DeepAsync<Response> {
             return this.storage.state;
         }
     }
-    updateResponse = async (updater: (prevState: Response) => Response): Promise<DeepAsyncState<Response>> => {
+    update = async (updater: (prevState: Response) => Response): Promise<DeepAsyncState<Response>> => {
         await this.storage.update(
             (state: DeepAsyncState<Response>) =>
                 ({
                     ...state,
                     status: AsyncStatus.Succeeded,
-                    data: updater(state.data), 
+                    data: updater(state.data),
                     error: undefined
                 }));
         return this.storage.state;
