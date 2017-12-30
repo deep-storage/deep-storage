@@ -5,40 +5,36 @@ export declare enum AsyncStatus {
     Failed = 2,
     Succeeded = 3,
 }
-export interface DeepAsyncState<Request, Response> {
+export interface DeepAsyncState<Response> {
     status: AsyncStatus;
-    request?: Request;
-    response?: Response;
+    data?: Response;
     error?: any;
 }
-export interface DeepAsync<Request, Response> extends DeepAsyncState<Request, Response>, UsesDeepStorage<DeepAsyncState<Request, Response>> {
+export interface DeepAsync<Response> extends DeepAsyncState<Response>, UsesDeepStorage<DeepAsyncState<Response>> {
     completed: boolean;
     succeeded: boolean;
     running: boolean;
     started: boolean;
     failed: boolean;
-    run(request: Request): Promise<DeepAsyncState<Request, Response>>;
-    rerun(): Promise<DeepAsyncState<Request, Response>>;
-    updateResponse(updater: (prevState: Response) => Response): Promise<DeepAsyncState<Request, Response>>;
+    run(): Promise<DeepAsyncState<Response>>;
+    updateResponse(updater: (prevState: Response) => Response): Promise<DeepAsyncState<Response>>;
 }
 export declare class AlreadyRunningError extends Error {
 }
-export declare class DefaultDeepAsync<Request, Response> implements DeepAsync<Request, Response> {
-    storage: DeepStorage<DeepAsyncState<Request, Response>>;
-    process: (request: Request) => Promise<Response>;
-    constructor(storage: DeepStorage<DeepAsyncState<Request, Response>>, process: (request: Request) => Promise<Response>);
-    run: (request: Request) => Promise<DeepAsyncState<Request, Response>>;
-    rerun: () => Promise<DeepAsyncState<Request, Response>>;
-    updateResponse: (updater: (prevState: Response) => Response) => Promise<DeepAsyncState<Request, Response>>;
+export declare class DefaultDeepAsync<Response> implements DeepAsync<Response> {
+    storage: DeepStorage<DeepAsyncState<Response>>;
+    process: () => Promise<Response>;
+    constructor(storage: DeepStorage<DeepAsyncState<Response>>, process: () => Promise<Response>);
+    run: () => Promise<DeepAsyncState<Response>>;
+    updateResponse: (updater: (prevState: Response) => Response) => Promise<DeepAsyncState<Response>>;
     readonly status: AsyncStatus;
     readonly running: boolean;
     readonly started: boolean;
     readonly succeeded: boolean;
     readonly failed: boolean;
     readonly completed: boolean;
-    readonly request: Request;
-    readonly response: Response;
+    readonly data: Response;
     readonly error: any;
 }
-export declare const deepAsync: <Request, Response>(storage: DeepStorage<DeepAsyncState<Request, Response>, {}>, process: (request: Request) => Promise<Response>) => Promise<DefaultDeepAsync<Request, Response>>;
+export declare const deepAsync: <Response>(storage: DeepStorage<DeepAsyncState<Response>, {}>, process: () => Promise<Response>) => Promise<DefaultDeepAsync<Response>>;
 export default deepAsync;

@@ -5,8 +5,8 @@ test('deepAsync', async () => {
   const value = await deepAsync(storage.deep('test'), async () => 'test');
   expect(value.started).toBeFalsy();
   expect(value.status).toBe(AsyncStatus.Created);
-  await value.run({});
+  await value.run();
   expect(value.started).toBeTruthy();
   expect(value.status).toBe(AsyncStatus.Succeeded);
-  expect(value.response).toBe('test');
+  expect(value.data).toBe('test');
 });
