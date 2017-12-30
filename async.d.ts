@@ -5,9 +5,9 @@ export declare enum AsyncStatus {
     Failed = 2,
     Succeeded = 3,
 }
-export interface DeepAsyncState<Response> {
+export interface DeepAsyncState<Data> {
     status: AsyncStatus;
-    data?: Response;
+    data?: Data;
     error?: any;
 }
 export interface DeepAsync<Response> extends DeepAsyncState<Response>, UsesDeepStorage<DeepAsyncState<Response>> {

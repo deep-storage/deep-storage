@@ -7,9 +7,9 @@ export enum AsyncStatus {
     Succeeded
 }
 
-export interface DeepAsyncState<Response> {
+export interface DeepAsyncState<Data> {
     status: AsyncStatus;
-    data?: Response;
+    data?: Data;
     error?: any;
 }
 
