@@ -1,4 +1,4 @@
-import { DeepStorage, UsesDeepStorage } from "./index";
+import { DeepStorage } from "./index";
 export declare enum AsyncStatus {
     Created = 0,
     Running = 1,
@@ -10,7 +10,7 @@ export interface DeepAsyncState<Data> {
     data?: Data;
     error?: any;
 }
-export interface DeepAsync<Response> extends DeepAsyncState<Response>, UsesDeepStorage<DeepAsyncState<Response>> {
+export interface DeepAsync<Response> extends DeepAsyncState<Response> {
     completed: boolean;
     succeeded: boolean;
     running: boolean;
