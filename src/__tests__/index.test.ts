@@ -19,23 +19,6 @@ test('props', () => {
   expect(props.value2.state).toEqual('two');
 });
 
-test('deepInit', () => {
-  const storage = deepStorage({
-  });
-  const testStorage = storage.deepInit('test')(1);
-  expect(testStorage.state).toEqual(1);
-});
-
-test('init', () => {
-  const storage = deepStorage({
-  });
-  let loginStorage = storage.deep('app', 'login');
-  loginStorage = loginStorage.init({
-    lastLoginFailed: false
-  });
-  expect(loginStorage.deep('lastLoginFailed').state).toEqual(false);
-});
-
 test('deep', () => {
   const storage = deepStorage({
     todos: { abc: { id: 'abc', title: 'do something' } }
