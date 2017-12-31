@@ -98,6 +98,10 @@ export interface DeepSubscription {
     cancel: () => void;
 }
 
+export interface UsesDeepStorage<State> {
+    storage: DeepStorage<State>;
+}
+
 export type stringOrNumber = string | number;
 export type Path = stringOrNumber[];
 
