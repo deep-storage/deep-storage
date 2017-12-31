@@ -18,6 +18,7 @@ export interface DeepAsync<Response> extends DeepAsyncState<Response> {
     failed: boolean;
     run(): Promise<DeepAsyncState<Response>>;
     update(updater: (prevState: Response) => Response): Promise<DeepAsyncState<Response>>;
+    storage: DeepStorage<DeepAsyncState<Response>>;
 }
 export declare class AlreadyRunningError extends Error {
 }
