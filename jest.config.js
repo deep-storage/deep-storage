@@ -1,9 +1,17 @@
-// jest.config.js
 module.exports = {
-    rootDir: 'src',
-    moduleFileExtensions: ['js', 'jsx', 'json', 'ts', 'tsx'],
-    transform: {
-        '^.+\\.(ts|tsx)$': '<rootDir>/../preprocessor.js'
+    "roots": [
+      "<rootDir>/src"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
     },
-    testMatch: ['**/__tests__/*.(ts|tsx|js)']
-};
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ],
+  }

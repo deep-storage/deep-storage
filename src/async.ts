@@ -1,4 +1,4 @@
-import { DeepStorage } from "./index";
+import { deepStorage, DeepStorage } from "./index";
 
 export enum AsyncStatus {
     Created,
@@ -20,7 +20,7 @@ export interface DeepAsync<Response> extends DeepAsyncState<Response> {
     started: boolean;
     failed: boolean;
     run(): Promise<DeepAsyncState<Response>>;
-    update(updater: (prevState: Response) => Response): Promise<DeepAsyncState<Response>>;
+    update(updater: (prevState?: Response) => Response): Promise<DeepAsyncState<Response>>;
     storage: DeepStorage<DeepAsyncState<Response>>;
 }
 
@@ -46,7 +46,7 @@ export class DefaultDeepAsync<Response> implements DeepAsync<Response> {
             return this.storage.state;
         }
     }
-    update = async (updater: (prevState: Response) => Response): Promise<DeepAsyncState<Response>> => {
+    update = async (updater: (prevState?: Response) => Response): Promise<DeepAsyncState<Response>> => {
         await this.storage.update(
             (state: DeepAsyncState<Response>) =>
                 ({
@@ -68,13 +68,10 @@ export class DefaultDeepAsync<Response> implements DeepAsync<Response> {
 }
 
 export const deepAsync = async <Response>(
-    storage: DeepStorage<DeepAsyncState<Response>>,
     process: () => Promise<Response>
 ) => {
-    await storage.set({
+    const storage = deepStorage({
         status: AsyncStatus.Created
     });
     return new DefaultDeepAsync(storage, process);
 }
-
-export default deepAsync;

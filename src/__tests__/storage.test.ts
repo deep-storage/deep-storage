@@ -1,10 +1,10 @@
-import deepStorage, { isPathMatch } from '../';
+import { deepStorage, isPathMatch } from '../';
 
 test('stateIn', () => {
   const storage = deepStorage({
     todos: { abc: { id: 'abc', title: 'do something' } }
   });
-  expect(storage.stateIn('todos', 'abc', 'title')).toBe('do something');
+  expect(storage.deep('todos').deep('abc').deep('title').state).toBe('do something');
 });
 
 test('props', () => {
@@ -23,24 +23,24 @@ test('deep', () => {
   const storage = deepStorage({
     todos: { abc: { id: 'abc', title: 'do something' } }
   });
-  const deep = storage.deep('todos', 'abc');
-  expect(deep.stateIn('title')).toBe('do something');
+  const deep = storage.deep('todos').deep('abc').deep('title');
+  expect(deep.state).toBe('do something');
 });
 
 test('updateIn', () => {
   const storage = deepStorage({
     todos: { abc: { id: 'abc', title: 'do something' } }
   });
-  storage.updateIn('todos', 'abc')<{ title: string }>(abc => ({ ...abc, title: 'test' }));
-  expect(storage.stateIn('todos', 'abc', 'title')).toBe('test');
+  storage.deep('todos').deep('abc').update(abc => ({ ...abc, title: 'test' }));
+  expect(storage.deep('todos').deep('abc').deep('title').state).toBe('test');
 });
 
 test('setIn', () => {
   const storage = deepStorage({
     todos: { abc: { id: 'abc', title: 'do something' } }
   });
-  storage.setIn('todos', 'abc', 'title')<string>('test');
-  expect(storage.stateIn('todos', 'abc', 'title')).toBe('test');
+  storage.deep('todos').deep('abc').deep('title').set('test');
+  expect(storage.deep('todos').deep('abc').deep('title').state).toBe('test');
 });
 
 test('subscription', (done) => {
@@ -54,7 +54,7 @@ test('subscription', (done) => {
     done();
   });
   subscription.subscribeTo('todos');
-  storage.setIn('todos', 'abc', 'title')<string>('test');
+  storage.deep('todos').deep('abc').deep('title').set('test');
   subscription.cancel();
 });
 
@@ -77,7 +77,7 @@ test('isPathMatch', () => {
 
 test('subscription and update', (done) => {
   const storage = deepStorage({
-    todos: []
+    todos: [] as number[]
   });
   const subscription = storage.subscription((path, newState, oldState) => {
     expect(path).toEqual([]);

@@ -9,12 +9,11 @@
     "url": "https://github.com/deep-storage/deep-storage.git"
   },
   "devDependencies": {
-    "@types/jest": "^21.1.10",
-    "jest": "^22.0.4",
+    "@types/jest": "^23.1.4",
+    "jest": "^23.3.0",
     "rimraf": "^2.6.2",
-    "typescript": "^2.6.2",
-    "webpack": "^3.10.0",
-    "webpack-dev-server": "^2.9.7"
+    "ts-jest": "^23.0.0",
+    "typescript": "^2.9.2"
   },
   "scripts": {
     "test": "jest",

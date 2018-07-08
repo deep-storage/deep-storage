@@ -1,12 +1,11 @@
-import {deepAsync, deepStorage, AsyncStatus} from '../';
+import { deepAsync, AsyncStatus } from "../";
 
-test('deepAsync', async () => {
-  const storage = deepStorage({});
-  const value = await deepAsync(storage.deep('test'), async () => 'test');
+test("deepAsync", async () => {
+  const value = await deepAsync(async () => "test");
   expect(value.started).toBeFalsy();
   expect(value.status).toBe(AsyncStatus.Created);
   await value.run();
   expect(value.started).toBeTruthy();
   expect(value.status).toBe(AsyncStatus.Succeeded);
-  expect(value.data).toBe('test');
+  expect(value.data).toBe("test");
 });
