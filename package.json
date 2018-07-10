@@ -18,9 +18,9 @@
   "scripts": {
     "test": "jest",
     "build": "rimraf lib *.d.ts && tsc -p tsconfig.prod.json",
-    "publish:patch": "yarn build && npm version patch && git push && npm publish",
-    "publish:minor": "yarn build && npm version minor && git push && npm publish",
-    "publish:major": "yarn build && npm version major && git push && npm publish"
+    "publish:patch": "yarn build && npm version patch && git push",
+    "publish:minor": "yarn build && npm version minor && git push",
+    "publish:major": "yarn build && npm version major && git push"
   },
   "dependencies": {},
   "types": "./lib/index.d.ts"

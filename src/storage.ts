@@ -1,14 +1,33 @@
 export type StateUpdateCallback = <DeepState>(path: Path, newState: DeepState, oldState: DeepState) => void;
 
-export interface DeepSubscriptions {
-    /**
-     * Returns a new subscription that can subscribeTo paths in state. Note,
-     * the subscription must be cancelled when no longer in use.
-     */
-    subscription: (callback: StateUpdateCallback) => DeepSubscription;
+function arraysEqual(a: any, b: any) {
+  if (a === b) return true;
+  if (a == null || b == null) return false;
+  if (a.length != b.length) return false;
+
+  // If you don't care about the order of the elements inside
+  // the array, you should sort both arrays here.
+
+  for (var i = 0; i < a.length; ++i) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
 }
 
-export interface DeepStorage<State, RootState = {}> extends DeepSubscriptions {
+function removePath(pathToRemove: Path, paths: Path[]): Path[] {
+    let found = false;
+    const result: Path[] = [];
+    for(const path of paths) {
+        if(arraysEqual(path, pathToRemove) && !found) {
+            found = true;
+        } else {
+            result.push(path);
+        }
+    }
+    return result;
+}
+
+export interface DeepStorage<State, RootState = {}> {
 
     /**
      * sets a value in deep storage and notifies subscribers. shortcut for
@@ -51,6 +70,9 @@ export interface DeepStorage<State, RootState = {}> extends DeepSubscriptions {
      * Get the value of a property
      */
     prop: <Key extends keyof State>(name: Key) => State[Key];
+
+    addSubscriber: (subscriber: Subscriber) => void;
+    removeSubscriber: (subscriber: Subscriber) => void;
 }
 
 /**
@@ -71,26 +93,29 @@ export function isPathMatch<T>(stateChangePath: T[], subscriptionPath: T[]) {
     return true;
 }
 
-/**
- * A cancelable way to subscribe to paths in state
- */
-export interface DeepSubscription {
-    subscribeTo: (...path: Path) => void;
-    cancel: () => void;
-}
-
-export interface UsesDeepStorage<State> {
-    storage: DeepStorage<State>;
-}
-
 export type stringNumberOrSymbol = string | number | symbol;
 export type Path = stringNumberOrSymbol[];
 
+export class Subscriber {
+    public id: number;
+    private static idGenerator: number = 0;
+    private callback: StateUpdateCallback | undefined;
+    constructor() {
+        this.id = Subscriber.idGenerator++;
+    }
+    onChange(callback: StateUpdateCallback) {
+        this.callback = callback;
+    }
+    change<DeepState>(path: Path, newState: DeepState, oldState: DeepState) {
+        if(this.callback) {
+            this.callback(path, newState, oldState);
+        }
+    }
+}
+
 export class DefaultDeepStorage<State> implements DeepStorage<State, State> {
 
-    private id: number = 0;
-
-    private subscriptions: { [key: number]: { paths: Path[], callback: StateUpdateCallback } } = {};
+    private subscriptions: { [key: number]: { paths: Path[], subscriber: Subscriber } } = {};
     constructor(public state: State) {
     }
     update = (callback: (s: State) => State): Promise<DeepStorage<State, State>> => {
@@ -126,7 +151,7 @@ export class DefaultDeepStorage<State> implements DeepStorage<State, State> {
             const subscriber = this.subscriptions[subscriberId];
             // check to see if we have any matches
             if (subscriber.paths.some(subscriberPath => isPathMatch(stateChangePath, subscriberPath))) {
-                subscriber.callback(stateChangePath, newState, oldState)
+                subscriber.subscriber.change(stateChangePath, newState, oldState)
             }
         }
         return this.deepIn(...path);
@@ -149,22 +174,27 @@ export class DefaultDeepStorage<State> implements DeepStorage<State, State> {
     deep = <DeepState>(name: stringNumberOrSymbol): DeepStorage<DeepState, State> => {
         return this.deepIn(name);
     }
-    subscription = (callback: StateUpdateCallback) => {
-        const subscriberId = this.id++;
-        this.subscriptions[subscriberId] = {
-            callback,
-            paths: []
-        } as any;
-        const cancel = () => {
-            delete this.subscriptions[subscriberId];
+    addSubscriber = (subscriber: Subscriber) => {
+        this.addSubscriberIn(...this.path)(subscriber);
+    }
+    addSubscriberIn = (...path: Path) => (subscriber: Subscriber) => {
+        const subscription = this.subscriptions[subscriber.id];
+        if(subscription) {
+            subscription.paths.push(path);
+        } else {
+            this.subscriptions[subscriber.id] = {
+                paths: [path],
+                subscriber
+            }
         }
-        return {
-            subscribeTo: (...path: Path) => {
-                if (subscriberId in this.subscriptions) {
-                    this.subscriptions[subscriberId].paths.push(path);
-                }
-            },
-            cancel
+    }
+    removeSubscriber = (subscriber: Subscriber) => {
+        this.removeSubscriberIn(...this.path)(subscriber);
+    }
+    removeSubscriberIn = (...path: Path) => (subscriber: Subscriber) => {
+        const subscription = this.subscriptions[subscriber.id];
+        if(subscription) {
+            subscription.paths = removePath(path, subscription.paths);
         }
     }
     root = () => this;
@@ -210,17 +240,6 @@ export class NestedDeepStorage<State, RootState> implements DeepStorage<State, R
     deep = <DeepState>(...path: stringNumberOrSymbol[]): DeepStorage<DeepState, RootState> => {
         return this.rootStorage.deepIn(...this.path.concat(path));
     }
-    subscription = (callback: StateUpdateCallback): DeepSubscription => {
-        const rootSubscription = this.rootStorage.subscription((path, newState, oldState) => {
-            callback(path.slice(path.length - this.path.length, path.length), newState, oldState);
-        });
-        return {
-            subscribeTo: (...path: Path) => {
-                return rootSubscription.subscribeTo(...this.path.concat(path));
-            },
-            cancel: rootSubscription.cancel
-        }
-    }
     root = () => this.rootStorage;
     get props() {
         const result: any = {};
@@ -231,6 +250,12 @@ export class NestedDeepStorage<State, RootState> implements DeepStorage<State, R
     }
     prop = <Key extends keyof State>(name: Key) => {
         return this.deep<State[Key]>(name).state;
+    }
+    addSubscriber = (subscriber: Subscriber) => {
+        this.rootStorage.addSubscriberIn(...this.path)(subscriber);
+    }
+    removeSubscriber = (subscriber: Subscriber) => {
+        this.rootStorage.removeSubscriberIn(...this.path)(subscriber);
     }
 }
 

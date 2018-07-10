@@ -1,5 +1,5 @@
 node_modules/
 dist/
 lib/**/__tests__/
-notes.txt
+notes.md
 lib/
