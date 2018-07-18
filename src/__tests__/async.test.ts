@@ -1,4 +1,4 @@
-import { deepAsync, AsyncStatus } from "../";
+import { AsyncStatus, deepAsync } from "../";
 
 test("deepAsync", async () => {
   const value = await deepAsync(async () => "test");
