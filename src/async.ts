@@ -102,7 +102,7 @@ export class DefaultDeepAsync<Response> implements DeepAsync<Response> {
   }
 }
 
-export const deepAsync = async <Response>(process: () => Promise<Response>) => {
+export const deepAsync = <Response>(process: () => Promise<Response>) => {
   const storage = deepStorage({
     status: AsyncStatus.Created
   });

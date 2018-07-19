@@ -1,7 +1,7 @@
 import { AsyncStatus, deepAsync } from "../";
 
 test("deepAsync", async () => {
-  const value = await deepAsync(async () => "test");
+  const value = deepAsync(async () => "test");
   expect(value.started).toBeFalsy();
   expect(value.status).toBe(AsyncStatus.Created);
   await value.run();
