@@ -4,6 +4,13 @@
   "description": "Simple observable state management for reactive applications",
   "main": "./lib/index.js",
   "license": "MIT",
+  "keywords": [
+    "deep-storage",
+    "observable",
+    "state managment",
+    "react",
+    "data flow"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/deep-storage/deep-storage.git"

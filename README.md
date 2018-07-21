@@ -43,7 +43,7 @@ const storage = deepStorage({
 ### 2. Create a view that responds to changes in state
 
 ```javascript
-import { connect } from 'deep-storage-react';
+import { wire } from 'deep-storage-react';
 
 class TimerView extends React.Component {
     render() {
@@ -58,7 +58,7 @@ class TimerView extends React.Component {
     }
 };
 
-const DeepTimerView = connect({timer: storage.deep('timer')})(TimerView);
+const DeepTimerView = wire(TimerView, {timer: storage.deep('timer')});
 
 ReactDOM.render((
     <DeepTimerView resetTimer={resetTimer}/>
